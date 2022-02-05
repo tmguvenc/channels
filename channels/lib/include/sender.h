@@ -12,16 +12,19 @@ namespace channels {
 
 using SendResult = std::optional<std::string>;
 
-template <typename T> class SenderReceiverPair;
+template <typename T> 
+class SRPair;
 
-template <typename T> class Sender {
-  friend class SenderReceiverPair<T>;
-  explicit Sender(FifoPtr fifo_ptr) : fifo_ptr_(fifo_ptr) {
+template <typename T> 
+class Sender {
+  friend class SRPair<T>;
+  explicit Sender(FifoPtr fifo_ptr) noexcept 
+  : fifo_ptr_(fifo_ptr) {
     fd_ = open(fifo_ptr_->GetPath().c_str(), O_RDWR);
   }
 
 public:
-  ~Sender() {
+  ~Sender() noexcept {
     if (fd_ != -1) {
       close(fd_);
     }

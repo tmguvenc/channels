@@ -14,16 +14,19 @@ namespace channels {
 template<typename T>
 using ReceiveResult = std::variant<T, std::string>;
 
-template <typename T> class SenderReceiverPair;
+template <typename T> 
+class SRPair;
 
-template <typename T> class Receiver {
-  friend class SenderReceiverPair<T>;
-  explicit Receiver(FifoPtr fifo_ptr) : fifo_ptr_(fifo_ptr) {
+template <typename T> 
+class Receiver {
+  friend class SRPair<T>;
+  explicit Receiver(FifoPtr fifo_ptr) noexcept 
+  : fifo_ptr_(fifo_ptr) {
     fd_ = open(fifo_ptr_->GetPath().c_str(), O_RDWR);
   }
 
 public:
-  ~Receiver() {
+  ~Receiver() noexcept {
     if (fd_ != -1) {
       close(fd_);
     }
