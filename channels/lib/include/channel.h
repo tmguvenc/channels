@@ -2,25 +2,24 @@
 #define CHANNEL_H_
 
 #include "fifo.h"
-#include "sender.h"
 #include "receiver.h"
+#include "sender.h"
+#include <memory>
 #include <tuple>
 
 namespace channels {
 
-template<typename T>
-using SenderReceiverPair = std::pair<Sender<T>, Receiver<T>>;
+template <typename T> struct SenderReceiverPair {
+  SenderReceiverPair(FifoPtr fifo)
+      : sender(new Sender<T>(fifo)), receiver(new Receiver<T>(fifo)) {}
 
-template<typename T>
-class Channel {
+  std::unique_ptr<Sender<T>> sender;
+  std::unique_ptr<Receiver<T>> receiver;
+};
+
+template <typename T> class Channel {
 public:
-  static SenderReceiverPair<T> Open() {
-    auto fifo = std::make_shared<Fifo>();
-    return {
-      Sender<T>{fifo},
-      Receiver<T>{fifo}
-    };
-  }
+  static SenderReceiverPair<T> Open() { return {std::make_shared<Fifo>()}; }
 };
 
 } // namespace channels

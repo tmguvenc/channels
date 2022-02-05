@@ -10,5 +10,7 @@ file(GLOB SRC_FILES "src/*.c*")
 file(GLOB HDR_FILES "include/*.h*")
 
 include_directories(include)
+include_directories(${CHANNELS_LIB_INCLUDE_DIR})
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME} channels)
+target_link_libraries(${PROJECT_NAME} pthread)
