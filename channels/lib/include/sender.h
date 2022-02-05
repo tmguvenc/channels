@@ -2,10 +2,15 @@
 #define SENDER_H_
 
 #include "fifo.h"
+#include <cerrno>
+#include <cstring>
 #include <fcntl.h>
+#include <optional>
 #include <unistd.h> // for close
 
 namespace channels {
+
+using SendResult = std::optional<std::string>;
 
 template <typename T> class SenderReceiverPair;
 
@@ -27,7 +32,14 @@ public:
   Sender(Sender &&other) noexcept = delete;
   Sender &operator=(Sender &&other) noexcept = delete;
 
-  int Send(const T &item) { return write(fd_, &item, sizeof(T)); }
+  [[nodiscard]] SendResult Send(const T &item) {
+    const auto bytes = write(fd_, &item, sizeof(T));
+    if (bytes < 0) {
+      return std::strerror(errno);
+    }
+
+    return {};
+  }
 
 private:
   int fd_{-1};

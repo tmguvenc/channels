@@ -6,9 +6,13 @@
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
+#include <variant>
 #include <unistd.h> // for close
 
 namespace channels {
+
+template<typename T>
+using ReceiveResult = std::variant<T, std::string>;
 
 template <typename T> class SenderReceiverPair;
 
@@ -16,10 +20,6 @@ template <typename T> class Receiver {
   friend class SenderReceiverPair<T>;
   explicit Receiver(FifoPtr fifo_ptr) : fifo_ptr_(fifo_ptr) {
     fd_ = open(fifo_ptr_->GetPath().c_str(), O_RDWR);
-
-    if (fd_ == -1) {
-      std::cerr << std::strerror(errno) << std::endl;
-    }
   }
 
 public:
@@ -34,10 +34,14 @@ public:
   Receiver(Receiver &&other) noexcept = delete;
   Receiver &operator=(Receiver &&other) noexcept = delete;
 
-  T Receive() {
+  [[nodiscard]] ReceiveResult<T> Receive() {
     T item{};
-    if (read(fd_, &item, sizeof(T)) < 0) {
-      std::cerr << std::strerror(errno) << std::endl;
+    const auto bytes = read(fd_, &item, sizeof(T));
+    if (bytes < 0) {
+      return std::strerror(errno);
+    }
+    if (bytes < 0) {
+      return "channel closed";
     }
     return item;
   }

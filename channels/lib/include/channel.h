@@ -18,6 +18,10 @@ template <typename T> struct SenderReceiverPair {
 };
 
 template <typename T> class Channel {
+  static_assert(std::is_default_constructible_v<T>,
+                "T must be default constructable");
+  static_assert(!std::is_pointer_v<T>, "T must be non-pointer type");
+
 public:
   static SenderReceiverPair<T> Open() { return {std::make_shared<Fifo>()}; }
 };
