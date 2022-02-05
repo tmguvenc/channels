@@ -43,7 +43,8 @@
     "sstream": "cpp",
     "stdexcept": "cpp",
     "streambuf": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "variant": "cpp"
   },
   "cmake.configureOnOpen": false,
   "C_Cpp.default.cppStandard": "c++17"

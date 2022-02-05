@@ -19,8 +19,11 @@ int main() {
                           [&](const int received_data) {
                             std::cerr << "received: " << received_data
                                       << std::endl;
+                          },
+                          [&](const channels::Timeout & /*timeout*/) {
+                            std::cerr << "timeout!" << std::endl;
                           }},
-               rec->Receive());
+               rec->ReceiveTimeout(1100));
   });
 
   std::cout << "waiting for data\n";

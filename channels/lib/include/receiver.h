@@ -8,11 +8,14 @@
 #include <iostream>
 #include <variant>
 #include <unistd.h> // for close
+#include <poll.h>
 
 namespace channels {
 
+struct Timeout{};
+
 template<typename T>
-using ReceiveResult = std::variant<T, std::string>;
+using ReceiveResult = std::variant<T, Timeout, std::string>;
 
 template <typename T> 
 class SRPair;
@@ -47,6 +50,19 @@ public:
       return "channel closed";
     }
     return item;
+  }
+
+  [[nodiscard]] ReceiveResult<T> ReceiveTimeout(const int32_t timeout_ms) {
+    pollfd pfd {.fd = fd_, .events = POLLIN};
+    const auto ret = poll(&pfd, 1, timeout_ms);
+    if(ret < 0) {
+      return std::strerror(errno);
+    }
+    if(ret == 0) {
+      return Timeout{};
+    }
+
+    return Receive();
   }
 
 private:
